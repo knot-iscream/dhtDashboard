@@ -1,42 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My First Website</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Fardin's Live Sensor</title>
+  <link rel="stylesheet" href="style.css"/>
+  <!-- MQTT client library via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 </head>
 <body>
 
   <header>
-    <h1>Hi, I'm Fardin 👋</h1>
-    <p>Engineering student | Builder | Curious mind</p>
+    <h1>Live Sensor Feed 🌡️</h1>
+    <p>ESP32 + DHT22 — updates every 5 seconds</p>
+    <div id="status" class="status disconnected">⚪ Connecting...</div>
   </header>
 
   <main>
-    <section class="about">
-      <h2>About Me</h2>
-      <p>I'm studying engineering and learning to build things — including this website!</p>
-    </section>
+    <div class="card-grid">
 
-    <section class="skills">
-      <h2>My Skills</h2>
-      <ul>
-        <li>Embedded Systems</li>
-        <li>Python & MATLAB</li>
-        <li>Problem Solving</li>
-      </ul>
-    </section>
+      <div class="card">
+        <div class="icon">🌡️</div>
+        <div class="label">Temperature</div>
+        <div class="value" id="temp">--</div>
+        <div class="unit">°C</div>
+      </div>
 
-    <section class="contact">
-      <h2>Say Hello</h2>
-      <button onclick="sayHello()">Click me!</button>
-      <p id="message"></p>
-    </section>
+      <div class="card">
+        <div class="icon">💧</div>
+        <div class="label">Humidity</div>
+        <div class="value" id="humid">--</div>
+        <div class="unit">%</div>
+      </div>
+
+    </div>
+
+    <div class="last-update">
+      Last updated: <span id="timestamp">waiting for data...</span>
+    </div>
   </main>
 
   <footer>
-    <p>Made by me — from scratch 🚀</p>
+    <p>Made by Fardin 🚀</p>
   </footer>
 
   <script src="script.js"></script>
