@@ -15,7 +15,7 @@ const char* topic_temp  = "fardin/sensor/temperature";
 const char* topic_humid = "fardin/sensor/humidity";
 // ===========================
 
-#define DHTPIN 33
+#define DHTPIN 32
 #define DHTTYPE DHT22
 
 DHT dht(DHTPIN, DHTTYPE);
