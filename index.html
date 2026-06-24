@@ -10,17 +10,13 @@
 </head>
 <body>
   <div class="background-blur"></div>
-
-  <header>
-    <h1>Live Sensor Feed</h1>
-    <div id="status" class="status disconnected">⚪ Connecting...</div>
-  </header>
+  <div id="status" class="floating-status disconnected">Connecting...</div>
 
   <main>
     <div class="card">
       <div class="toggle-buttons">
-        <button class="toggle-btn active" data-type="temp">🌡️ Temperature</button>
-        <button class="toggle-btn" data-type="humid">💧 Humidity</button>
+        <button class="toggle-btn active" data-type="temp">Temperature</button>
+        <button class="toggle-btn" data-type="humid">Humidity</button>
       </div>
 
       <div class="sensor-display">

@@ -48,35 +48,35 @@ client.onMessageArrived = function(message) {
 
 client.onConnectionLost = function(response) {
   if (!navigator.onLine) {
-    setStatus("offline", "⚪ Offline — waiting for internet...");
+    setStatus("offline", "Offline — waiting for internet...");
     scheduleReload(RELOAD_DELAY_MS);
     return;
   }
-  setStatus("disconnected", "⚪ Disconnected — retrying...");
+  setStatus("disconnected", "Disconnected — retrying...");
   setTimeout(connect, 3000);
 };
 
 function connect() {
   if (!navigator.onLine) {
-    setStatus("offline", "⚪ Offline — reconnect when internet returns");
+    setStatus("offline", "Offline — reconnect when internet returns");
     scheduleReload(RELOAD_DELAY_MS);
     return;
   }
 
   cancelReload();
-  setStatus("disconnected", "⚪ Connecting...");
+  setStatus("disconnected", "Connecting...");
   client.connect({
     onSuccess: function() {
-      setStatus("connected", "🟢 Live");
+      setStatus("connected", "Live");
       client.subscribe(TOPIC_TEMP);
       client.subscribe(TOPIC_HUMID);
     },
     onFailure: function(err) {
       if (!navigator.onLine) {
-        setStatus("offline", "⚪ Offline — waiting for internet...");
+        setStatus("offline", "Offline — waiting for internet...");
         scheduleReload(RELOAD_DELAY_MS);
       } else {
-        setStatus("error", "🔴 Connection failed — retrying...");
+        setStatus("error", "Connection failed — retrying...");
         setTimeout(connect, 5000);
       }
       console.error("MQTT Connection Error:", err);
@@ -171,18 +171,18 @@ function cancelReload() {
 }
 
 function setStatus(type, text) {
-  statusEl.className = "status " + type;
+  statusEl.className = "floating-status " + type;
   statusEl.textContent = text;
 }
 
 window.addEventListener("offline", () => {
-  setStatus("offline", "⚪ Offline — reloading when internet returns...");
+  setStatus("offline", "Offline — reloading when internet returns...");
   scheduleReload(RELOAD_DELAY_MS);
 });
 
 window.addEventListener("online", () => {
   cancelReload();
-  setStatus("disconnected", "⚪ Online — reconnecting...");
+  setStatus("disconnected", "Online — reconnecting...");
   connect();
 });
 

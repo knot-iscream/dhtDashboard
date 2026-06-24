@@ -42,49 +42,60 @@ body::before {
 }
 
 header {
-  text-align: center;
-  padding: 50px 20px 30px;
-  border-bottom: 2px solid #000000;
-  background-color: #cb2957;
-  color: #ffffff;
-  position: relative;
-  z-index: 1;
+  display: none;
 }
 
-header h1 {
-  font-size: 2rem;
-  color: #ffffff;
-}
-
-header p {
-  color: #f3d6e2;
-  margin-top: 6px;
-}
-
-.status {
+.floating-status {
+  position: fixed;
+  top: 20px;
+  right: 20px;
   display: inline-block;
-  margin-top: 14px;
-  padding: 8px 18px;
+  padding: 8px 16px;
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: bold;
-  background: #000000;
+  background: rgba(0, 0, 0, 0.7);
   color: #eeeeee;
+  z-index: 100;
+  backdrop-filter: blur(10px);
 }
-.disconnected { background: #000000; color: #eeeeee; }
-.connected    { background: #cb2957; color: #eeeeee; }
-.error        { background: #000000; color: #eeeeee; }
+
+.floating-status.disconnected { 
+  background: rgba(0, 0, 0, 0.7); 
+  color: #eeeeee; 
+}
+
+.floating-status.connected { 
+  background: rgba(203, 41, 87, 0.7); 
+  color: #eeeeee; 
+}
+
+.floating-status.error { 
+  background: rgba(0, 0, 0, 0.7); 
+  color: #eeeeee; 
+}
+
+.floating-status.offline { 
+  background: rgba(0, 0, 0, 0.7); 
+  color: #eeeeee; 
+}
 
 main {
   max-width: 700px;
-  margin: 50px auto;
+  width: 100%;
   padding: 0 20px;
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0 auto;
 }
 
 .card {
-  background: rgba(238, 238, 238, 0.45);
+  background: rgba(238, 238, 238, 0.25);
   border: none;
   border-radius: 16px;
   padding: 40px 30px;
