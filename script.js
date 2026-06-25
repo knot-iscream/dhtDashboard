@@ -33,6 +33,7 @@ const historyTimestamps = [];
 let chartAnimationId    = null;
 let chartAnimationStart = 0;
 let chartAnimationOldCount = 0;
+let chartRenderRaf      = null;
 const CHART_ANIMATION_DURATION = 500;
 
 const RELOAD_DELAY_MS = 5000;
@@ -137,7 +138,7 @@ client.onMessageArrived = function(message) {
 
   timestampEl.textContent = now.toLocaleTimeString();
   chartTimestampEl.textContent = now.toLocaleTimeString();
-  updateHistoryChart();
+  requestChartRender();
 };
 
 function appendHistory(type, value, now) {
@@ -323,6 +324,14 @@ function animateChart(timestamp) {
   }
 }
 
+function requestChartRender() {
+  if (chartRenderRaf !== null) return;
+  chartRenderRaf = requestAnimationFrame(() => {
+    chartRenderRaf = null;
+    updateHistoryChart();
+  });
+}
+
 function updateHistoryChart(progress = 1) {
   const ctx = chartCanvas.getContext("2d", { alpha: true });
   const width = chartCanvas.clientWidth;
@@ -397,7 +406,6 @@ function updateHistoryChart(progress = 1) {
   }
   ctx.stroke();
 
-  // Draw data points - skip on very small screens if many points
   const shouldDrawPoints = pointCount <= 12 || window.innerWidth >= 768;
   if (shouldDrawPoints) {
     ctx.fillStyle = "#cb2957";

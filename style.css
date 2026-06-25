@@ -23,10 +23,17 @@ body {
   background-image: url('https://picsum.photos/1920/1080?random=1');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
+  background-attachment: scroll;
   background-repeat: no-repeat;
   filter: blur(8px);
   z-index: -1;
+  will-change: transform;
+}
+
+@media (max-width: 800px) {
+  .background-blur {
+    filter: blur(4px);
+  }
 }
 
 @keyframes gradientShift {
