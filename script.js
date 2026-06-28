@@ -28,7 +28,7 @@ const chartCanvas      = document.getElementById("history-chart");
 const STORAGE_KEY      = "iscream_sensorHistory";
 
 // State
-let currentDisplay      = "temp";  // "temp" or "humid"
+let currentDisplay      = "temp";
 let currentChartType    = "temp";
 let tempValue           = null;
 let humidValue          = null;
@@ -46,6 +46,13 @@ const CHART_ANIMATION_DURATION = 500;
 
 const RELOAD_DELAY_MS = 5000;
 let reloadTimer = null;
+
+// ===== Firefox mobile-only detection =====
+// Only targets Firefox on Android (phone/tablet). Firefox desktop is NOT affected.
+const isFirefoxMobile = navigator.userAgent.toLowerCase().includes("firefox") && /android|mobile|tablet/i.test(navigator.userAgent);
+if (isFirefoxMobile) {
+  document.documentElement.classList.add("firefox");
+}
 
 // Responsive optimization
 let resizeDebounceId = null;
@@ -135,18 +142,21 @@ client.onMessageArrived = function(message) {
     appendHistory("temp", tempValue, now);
     saveHistoryToStorage();
     if (currentDisplay === "temp") updateHealthBar(tempValue, "temp");
-    if (currentChartType === "temp") startChartAnimation();
+    if (currentChartType === "temp") {
+      if (isFirefoxMobile) requestChartRender(); else startChartAnimation();
+    }
   } else if (topic === TOPIC_HUMID) {
     humidValue = parseFloat(payload);
     appendHistory("humid", humidValue, now);
     saveHistoryToStorage();
     if (currentDisplay === "humid") updateHealthBar(humidValue, "humid");
-    if (currentChartType === "humid") startChartAnimation();
+    if (currentChartType === "humid") {
+      if (isFirefoxMobile) requestChartRender(); else startChartAnimation();
+    }
   }
 
   timestampEl.textContent = now.toLocaleTimeString();
   chartTimestampEl.textContent = now.toLocaleTimeString();
-  requestChartRender();
 };
 
 function appendHistory(type, value, now) {
@@ -229,7 +239,7 @@ function getSensorComment(value, type) {
 function updateHealthBar(value, type) {
   displayValueEl.textContent = value.toFixed(1);
   displayCommentEl.textContent = getSensorComment(value, type);
-  
+
   let percentage, minRange, maxRange;
   if (type === "temp") {
     minRange = 25;
@@ -282,6 +292,14 @@ function switchChartDisplay(type) {
   chartToggleBtns.forEach(btn => {
     btn.classList.toggle("active", btn.dataset.type === type);
   });
+
+  if (isFirefoxMobile) {
+    // Firefox mobile: skip the chart-fade animation entirely — it's janky
+    currentChartType = type;
+    saveHistoryToStorage();
+    requestChartRender();
+    return;
+  }
 
   chartFrame?.classList.add("chart-transitioning");
 
@@ -360,8 +378,10 @@ function updateHistoryChart(progress = 1) {
   const ctx = chartCanvas.getContext("2d", { alpha: true });
   const width = chartCanvas.clientWidth;
   const height = window.innerWidth < 480 ? 240 : 320;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap DPR for performance
-  
+  // Firefox mobile: DPR capped at 1 (half the pixels = faster canvas).
+  // All others: up to 2x for crisp rendering.
+  const dpr = isFirefoxMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+
   chartCanvas.width = width * dpr;
   chartCanvas.height = height * dpr;
   chartCanvas.style.height = `${height}px`;
@@ -370,7 +390,6 @@ function updateHistoryChart(progress = 1) {
   ctx.clearRect(0, 0, width, height);
 
   const data = currentChartType === "temp" ? tempHistory : humidHistory;
-  const labels = historyTimestamps;
 
   if (data.length === 0) {
     ctx.fillStyle = "#333";
@@ -388,14 +407,17 @@ function updateHistoryChart(progress = 1) {
   const minY = minValue - valueBuffer;
   const maxY = maxValue + valueBuffer;
 
-  ctx.strokeStyle = "rgba(0,0,0,0.08)";
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = padding + (chartHeight * i / 4);
-    ctx.beginPath();
-    ctx.moveTo(padding, y);
-    ctx.lineTo(width - padding, y);
-    ctx.stroke();
+  // Firefox mobile: skip background grid lines (fewer draw calls)
+  if (!isFirefoxMobile) {
+    ctx.strokeStyle = "rgba(0,0,0,0.08)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = padding + (chartHeight * i / 4);
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(width - padding, y);
+      ctx.stroke();
+    }
   }
 
   ctx.strokeStyle = "#cb2957";
@@ -406,6 +428,8 @@ function updateHistoryChart(progress = 1) {
   const pointCount = data.length;
   const oldCount = Math.max(0, pointCount - 1);
 
+  // Sliding animation: when a new point arrives, old positions lerp toward new positions.
+  // This is the "new dot comes in, old dots move left" effect.
   const oldX = index => padding + (chartWidth * index / Math.max(1, oldCount - 1));
   const newX = index => padding + (chartWidth * index / Math.max(1, pointCount - 1));
 
@@ -430,16 +454,19 @@ function updateHistoryChart(progress = 1) {
   }
   ctx.stroke();
 
-  const shouldDrawPoints = pointCount <= 12 || window.innerWidth >= 768;
-  if (shouldDrawPoints) {
-    ctx.fillStyle = "#cb2957";
-    for (let index = 0; index < pointCount; index++) {
-      const x = getX(index);
-      const normalized = (data[index] - minY) / (maxY - minY);
-      const y = padding + chartHeight - normalized * chartHeight;
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
-      ctx.fill();
+  // Firefox mobile: skip data-point dots (fewer draw calls)
+  if (!isFirefoxMobile) {
+    const shouldDrawPoints = pointCount <= 12 || window.innerWidth >= 768;
+    if (shouldDrawPoints) {
+      ctx.fillStyle = "#cb2957";
+      for (let index = 0; index < pointCount; index++) {
+        const x = getX(index);
+        const normalized = (data[index] - minY) / (maxY - minY);
+        const y = padding + chartHeight - normalized * chartHeight;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
   }
 
@@ -451,7 +478,6 @@ function updateHistoryChart(progress = 1) {
     padding,
     20
   );
-
 }
 
 function scheduleReload(delay) {

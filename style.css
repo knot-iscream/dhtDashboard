@@ -12,39 +12,32 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Mobile-safe solid fallback — no fixed/blur background to fight with */
+  background-color: #f4e7df;
 }
 
-.background-blur {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('https://picsum.photos/1920/1080?random=1');
-  background-size: cover;
-  background-position: center;
-  background-attachment: scroll;
-  background-repeat: no-repeat;
-  filter: blur(8px);
-  z-index: -1;
-  will-change: transform;
-  pointer-events: none;
-}
-
-@media (max-width: 900px) {
-  .background-blur {
-    filter: blur(3px);
+@supports (background-image: url('')) {
+  body {
+    background-image: url('https://picsum.photos/1920/1080?random=1');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
 }
 
 @media (max-width: 640px) {
-  .background-blur {
+  body {
+    background-attachment: scroll;
     background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.1)), url('https://picsum.photos/1920/1080?random=1');
     background-color: #f4e7df;
-    filter: blur(2.4px);
     background-size: cover;
     background-position: center;
   }
+}
+
+.background-blur {
+  display: none;
 }
 
 @keyframes gradientShift {
@@ -636,4 +629,75 @@ footer {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ===== Firefox mobile performance overrides =====
+ * Applied only when JavaScript detects Firefox and adds the class.
+ * Chromium browsers (Chrome, Edge, Samsung, Opera) are completely unaffected.
+ *
+ * backdrop-filter is the #1 perf killer on Firefox mobile — it renders
+ * entirely on the CPU (no GPU acceleration like Chromium). Removing it
+ * on Firefox gives a massive frame-rate improvement. */
+.firefox .card,
+.firefox .floating-status,
+.firefox .toggle-btn,
+.firefox .chart-frame,
+.firefox .health-bar-container,
+.firefox .weather-metric {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Remove will-change which forces compositor layers (costly on Firefox) */
+.firefox .card,
+.firefox .chart-frame {
+  will-change: auto;
+}
+
+/* Slightly more opaque card background to compensate for missing blur */
+.firefox .card {
+  background: rgba(238, 238, 238, 0.45);
+}
+
+@media (max-width: 720px) {
+  .firefox .card {
+    background: rgba(255, 255, 255, 0.66);
+  }
+}
+
+@media (max-width: 640px) {
+  .firefox .card {
+    background: rgba(255, 255, 255, 0.62);
+  }
+}
+
+/* Toggle buttons — simplified shadow (no blur layer to interact with) */
+.firefox .toggle-btn {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Health bar transitions — shorter on Firefox to reduce paint churn */
+.firefox .health-bar {
+  transition: width 0.1s linear, background 0.1s linear;
+}
+
+/* Chart frame transitions — disable on Firefox */
+.firefox .chart-frame {
+  transition: none;
+}
+
+/* Floating status — solid background instead of semi-transparent + blur */
+.firefox .floating-status {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+/* Force background-attachment: scroll on Firefox mobile to avoid
+ * the expensive fixed-background compositing path */
+.firefox body {
+  background-attachment: scroll !important;
+}
+
+/* Weather metric badges — remove blur, keep border */
+.firefox .weather-metric {
+  background: rgba(255, 255, 255, 0.25);
 }
