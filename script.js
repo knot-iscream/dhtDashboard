@@ -288,7 +288,7 @@ function switchChartDisplay(type) {
   setTimeout(() => {
     currentChartType = type;
     saveHistoryToStorage();
-    updateHistoryChart();
+    requestChartRender();
     chartFrame?.classList.remove("chart-transitioning");
   }, prefersReducedMotion ? 50 : 200);
 }
@@ -312,7 +312,7 @@ function onWindowResize() {
     const newWidth = chartCanvas?.clientWidth;
     if (newWidth && newWidth !== lastKnownChartWidth) {
       lastKnownChartWidth = newWidth;
-      updateHistoryChart();
+      requestChartRender();
     }
     resizeDebounceId = null;
   }, RESIZE_DEBOUNCE_DELAY);

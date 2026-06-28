@@ -28,11 +28,20 @@ body {
   filter: blur(8px);
   z-index: -1;
   will-change: transform;
+  pointer-events: none;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .background-blur {
     filter: blur(4px);
+  }
+}
+
+@media (max-width: 640px) {
+  .background-blur {
+    background-image: none;
+    background-color: #f7f4f0;
+    filter: blur(1px);
   }
 }
 
@@ -158,10 +167,19 @@ main {
   border-radius: 12px;
   padding: 24px 18px;
   text-align: center;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   will-change: transform;
+}
+
+@media (max-width: 720px) {
+  .card {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.14);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.95);
+  }
 }
 
 .left-stack {
