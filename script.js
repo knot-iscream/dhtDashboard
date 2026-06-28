@@ -232,7 +232,7 @@ function getSensorComment(value, type) {
 
   if (value < 30) return "Dry as a bone.";
   if (value < 50) return "It fresh.";
-  if (value < 70) return "Sweaty as hell.";
+  if (value < 70) return "You shall sweat.";
   return "Need a spa day";
 }
 
