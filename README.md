@@ -108,3 +108,4 @@ Do not use these exact topic names unless you want to publish to the same topics
 ## Notes
 
 This dashboard assumes the ESP32 sends temperature and humidity values as plain numeric strings from the DHT sensor. The webpage renders those values in real time and keeps a short local history in the browser.
+
